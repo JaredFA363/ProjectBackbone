@@ -82,15 +82,16 @@ function App() {
 
   // ✨ your ground rules
   const groundRules = [
-    "Stay consistent, even when motivation fades.",
-    "One task at a time — focus matters.",
-    "Completion is better than perfection.",
+    "No Phones before 8 AM & after 8:30 PM.",
+    "No FAP",
+    "15 mins of meditation daily",
+    "Everyday be more bolder than yesterday",
   ];
 
   return (
     <div className="p-4 space-y-6">
       <h1 className="text-2xl font-bold">📅 Project-Backbone Calendar</h1>
-
+      <h4 className="text-2xl font-bold">Free myself from other opinions & Walk in Boldness</h4>
       {/* Ground Rules toggle button */}
       <button onClick={() => setShowRules(!showRules)}>
         {showRules ? "Hide Ground Rules" : "Show Ground Rules"}
