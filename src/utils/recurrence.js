@@ -1,29 +1,36 @@
-import { RRule } from "rrule";
-
-// Convert a task with recurrence into multiple events
-export function expandRecurringTask(task) {
-  if (!task.isRecurring || !task.recurrenceRule) return [task];
-
-  const startDate = new Date(task.date);
-
-  const options = {
-    freq: RRule[task.recurrenceRule.freq], // DAILY, WEEKLY, MONTHLY
-    dtstart: startDate,
-    until: task.recurrenceRule.until ? new Date(task.recurrenceRule.until) : null,
-  };
-
-  const rule = new RRule(options);
-
-  const dates = rule.all();
-
-  return dates.map(d => ({
-    ...task,
-    id: `${task.id}-${d.toISOString()}`, // unique ID for each occurrence
-    date: d.toISOString().split("T")[0],
-  }));
-}
-
-// Expand all tasks (both normal + recurring)
 export function expandTasks(tasks) {
-  return tasks.flatMap(t => expandRecurringTask(t));
+  const expanded = [];
+
+  tasks.forEach((task) => {
+    const baseId = task.id;
+    const startDate = new Date(task.date);
+    const endDate = task.recurrenceRule?.until
+      ? new Date(task.recurrenceRule.until)
+      : startDate;
+
+    let current = new Date(startDate);
+
+    while (current <= endDate) {
+      const dayStr = current.toISOString().split("T")[0];
+
+      expanded.push({
+        ...task,
+        id: `${baseId}-${dayStr}`,
+        date: dayStr,
+        completed: !!task.completedDates?.[dayStr], // ✅ per-day state
+      });
+
+      if (!task.isRecurring) break;
+
+      if (task.recurrenceRule.freq === "DAILY") {
+        current.setDate(current.getDate() + 1);
+      } else if (task.recurrenceRule.freq === "WEEKLY") {
+        current.setDate(current.getDate() + 7);
+      } else if (task.recurrenceRule.freq === "MONTHLY") {
+        current.setMonth(current.getMonth() + 1);
+      }
+    }
+  });
+
+  return expanded;
 }

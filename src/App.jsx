@@ -7,6 +7,9 @@ import { loadTasks, saveTasks } from "./utils/storage";
 function App() {
   const [tasks, setTasks] = useState([]);
   const [showRules, setShowRules] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0] // default to today
+  );
 
   useEffect(() => {
     setTasks(loadTasks());
@@ -17,17 +20,31 @@ function App() {
   }, [tasks]);
 
   const addTask = (task) => {
-    setTasks([...tasks, { ...task, id: Date.now().toString(), completed: false }]);
+    setTasks([
+      ...tasks,
+      { ...task, id: Date.now().toString(), completedDates: {} },
+    ]);
   };
 
-  const toggleComplete = (id) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const toggleComplete = (id, date) => {
+    setTasks(
+      tasks.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              completedDates: {
+                ...t.completedDates,
+                [date]: !t.completedDates?.[date],
+              },
+            }
+          : t
+      )
+    );
   };
 
   const deleteTask = (id) => {
-    setTasks(tasks.filter(t => t.id !== id));
+    setTasks(tasks.filter((t) => t.id !== id));
   };
-
 
   // Save tasks to a file
   const exportTasks = () => {
@@ -81,7 +98,9 @@ function App() {
 
       {/* Ground Rules section */}
       {showRules && (
-        <div style={{ marginTop: "12px", padding: "12px", border: "1px solid gray" }}>
+        <div
+          style={{ marginTop: "12px", padding: "12px", border: "1px solid gray" }}
+        >
           <h2>📖 Ground Rules</h2>
           <ul>
             {groundRules.map((rule, index) => (
@@ -95,7 +114,7 @@ function App() {
         <button onClick={exportTasks} style={{ marginRight: "8px" }}>
           💾 Export Tasks
         </button>
-        
+
         <label style={{ cursor: "pointer" }}>
           📂 Import Tasks
           <input
@@ -108,9 +127,18 @@ function App() {
       </div>
 
       {/* Existing functionality */}
-      <TaskForm onAdd={addTask} />
-      <CalendarView tasks={tasks} onDelete={deleteTask} />
-      <TaskList tasks={tasks} onToggle={toggleComplete} onDelete={deleteTask} />
+      <TaskForm onAdd={addTask} defaultDate={selectedDate} />
+      <CalendarView
+        tasks={tasks}
+        onDelete={deleteTask}
+        onSelectDate={setSelectedDate}
+      />
+      <TaskList
+        tasks={tasks}
+        onToggle={toggleComplete}
+        onDelete={deleteTask}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 }

@@ -18,7 +18,14 @@ export default function TaskForm({ onAdd }) {
         }
       : null;
 
-    onAdd({ title, date, isRecurring, recurrenceRule });
+    onAdd({
+      title,
+      date,
+      isRecurring,
+      recurrenceRule,
+      completedDates: {}, // ✅ track per-day completion
+    });
+
     setTitle("");
     setDate("");
     setIsRecurring(false);
@@ -27,18 +34,17 @@ export default function TaskForm({ onAdd }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+    <form
+      onSubmit={handleSubmit}
+      style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
+    >
       <input
         type="text"
         placeholder="Task name"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
+      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       <label>
         <input
           type="checkbox"
@@ -50,7 +56,10 @@ export default function TaskForm({ onAdd }) {
 
       {isRecurring && (
         <>
-          <select value={frequency} onChange={(e) => setFrequency(e.target.value)}>
+          <select
+            value={frequency}
+            onChange={(e) => setFrequency(e.target.value)}
+          >
             <option value="DAILY">Daily</option>
             <option value="WEEKLY">Weekly</option>
             <option value="MONTHLY">Monthly</option>
